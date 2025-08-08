@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Billing Menu UI</title>
+<style>
+body {
+  margin: 0;
+  font-family: 'Inter', sans-serif;
+  background-color: #f5f7fa;
+  min-height: 100vh;
+  position: relative;
+}
+
+/* Menu Bar */
+.menu-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  background: #fff;
+  padding: 12px 20px;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+  justify-content: center;
+  margin: 16px auto;
+  max-width: 95%;
+}
+
+.menu-item {
+  padding: 8px 14px;
+  background-color: #f0f4f8;
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.menu-item:hover { background-color: #e2e8f0; }
+.arrow { transition: transform 0.3s ease; }
+.menu-item.active .arrow { transform: rotate(180deg); }
+
+/* Dropdowns - default hidden */
+.dropdown {
+  position: fixed;
+  top: 100px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+  padding: 20px;
+  width: 90%;
+  max-width: 400px;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  z-index: 5;
+}
+
+.dropdown.open { display: flex; }
+.dropdown-wide { align-items: flex-start !important; overflow-y: auto; max-height: 320px; }
+.dropdown-expanded { height: auto !important; max-height: none !important; overflow: visible !important; align-items: flex-start; }
+.dropdown a:hover { text-decoration: underline; }
+
+/* Content Display */
+.content-display {
+  position: fixed;
+  bottom: 120px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #fff;
+  padding: 20px;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+  width: 90%;
+  max-width: 600px;
+  text-align: center;
+  font-size: 1rem;
+  z-index: 1;
+}
+
+@media (max-width: 768px) {
+  .content-display { bottom: 140px; padding: 16px; font-size: 0.95rem; }
+}
+
+@media screen and (orientation: landscape) and (max-height: 500px) {
+  .content-display { bottom: 150px; padding: 12px; font-size: 0.9rem; max-width: 90%; }
+}
+
+/* Payment UI */
+.payment-ui { text-align: center; line-height: 1.6; }
+.payment-ui h2 { margin-bottom: 16px; font-size: 1.3rem; font-weight: 600; }
+
+.cta-button {
+  display: inline-block;
+  margin: 8px 0;
+  padding: 10px 20px;
+  background-color: #1a73e8;
+  color: #fff;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: 600;
+  border: 2px solid #1a73e8;
+  cursor: pointer;
+  text-align: center;
+}
+.cta-button:hover { background-color: #1669c1; }
+
+/* Modal */
+.modal-overlay {
+  position: fixed; top: 0; left: 0;
+  width: 100vw; height: 100vh;
+  background-color: rgba(0,0,0,0.5);
+  display: none; justify-content: center; align-items: center;
+  z-index: 1000;
+}
+.modal-content {
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  width: 95%; max-width: 800px; height: 85%;
+  position: relative;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+}
+.modal-content iframe { width: 100%; height: 100%; border: none; }
+.close-button {
+  position: absolute; top: 8px; right: 8px;
+  background: #e53e3e; color: white; border: none;
+  border-radius: 50%; width: 32px; height: 32px;
+  font-weight: bold; font-size: 1.2rem;
+  cursor: pointer; line-height: 32px; text-align: center;
+}
+.close-button:hover { background: #c53030; }
+
+/* Responsive Adjustments */
+@media (max-width: 1024px) {
+  .menu-bar { flex-wrap: wrap; gap: 12px; }
+  .menu-item { flex: 1 1 calc(50% - 10px); justify-content: center; }
+  .dropdown { top: 120px; width: 95%; padding: 16px; }
+}
+@media (max-width: 768px) {
+  .menu-bar { align-items: stretch; }
+  .menu-item { width: 100%; justify-content: center; }
+  .dropdown {
+    text-align: center;
+    align-items: center !important;
+    justify-content: center;
+  }
+  .dropdown p,
+  .dropdown h2,
+  .dropdown a,
+  .dropdown div {
+    text-align: center !important;
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+@media (max-width: 480px) {
+  .menu-item { font-size: 0.9rem; padding: 8px 12px; }
+  .cta-button { font-size: 0.85rem; padding: 8px 16px; }
+  .modal-content { height: 80%; }
+}
+
+/* Landscape Mode Fix */
+@media screen and (orientation: landscape) and (max-height: 500px) {
+  .menu-bar {
+    flex-wrap: nowrap; gap: 8px; padding: 8px 12px;
+    overflow-x: auto; justify-content: flex-start; border-radius: 12px;
+  }
+  .menu-item { font-size: 0.85rem; padding: 6px 10px; flex-shrink: 0; }
+  .dropdown.open {
+    display: block;
+    max-height: calc(100vh - 120px);
+    overflow-y: auto;
+    padding: 12px;
+    font-size: 0.9rem;
+    border-radius: 12px;
+    background: #fff;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+  }
+  .dropdown.open::after {
+    content: "";
+    position: sticky;
+    bottom: 0;
+    left: 0; right: 0;
+    height: 24px;
+    background: linear-gradient(to bottom, transparent, white);
+    pointer-events: none;
+  }
+}
+
+/* Pay Now scroll + heading fix for Surface Duo & similar landscape devices */
+@media screen and (orientation: landscape) and (max-height: 600px), 
+       screen and (orientation: landscape) and (max-width: 950px) {
+  .dropdown-expanded.open {
+    top: 60px !important; /* higher so heading shows */
+    padding-top: 16px !important; /* breathing room */
+    max-height: calc(100vh - 80px) !important; /* extra space for scroll */
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+  }
+  .dropdown-expanded.open::after {
+    content: "";
+    position: sticky;
+    bottom: 0;
+    left: 0; right: 0;
+    height: 24px;
+    background: linear-gradient(to bottom, transparent, white);
+    pointer-events: none;
+  }
+}
+</style>
+</head>
+<body>
+
+<div class="menu-bar">
+  <div class="menu-item" onclick="toggleDropdown(this)">
+    Pay Now <span class="arrow">▼</span>
+    <div class="dropdown dropdown-expanded">
+      <div class="payment-ui">
+        <h2>Payments Prior To/On the Date of Service</h2>
+        <a href="#" class="cta-button" onclick="openModal()">Pay Now</a>
+        <p>Make sure to enter the account number provided to you by your Baylor Scott & White Surgicare Centennial patient representative.</p>
+        <p>If you are unable to pay the patient responsibility estimate in full prior to/on the date of service, please contact us directly:</p>
+        <a href="tel:2146190120" class="cta-button">(214) 619-0120</a>
+        <p>A Baylor Scott & White Surgicare Centennial patient representative can assist you in setting up a payment plan prior to/on the date of service.</p>
+      </div>
+    </div>
+  </div>
+  <div class="menu-item" onclick="toggleDropdown(this)">
+    CareCredit <span class="arrow">▼</span>
+    <div class="dropdown">
+      <div><strong>Apply for CareCredit</strong></div>
+      <a href="#" class="cta-button" onclick="openCareCreditModal(event)">Apply Now</a>
+    </div>
+  </div>
+  <div class="menu-item" onclick="toggleDropdown(this)">
+    Date of Services <span class="arrow">▼</span>
+    <div class="dropdown">
+      <div><strong>Billing Assistance</strong></div>
+      <a href="#" class="cta-button" onclick="handleDateOfServiceClick(event)">Dates of service prior to 04/01/2025</a>
+      <a href="#" class="cta-button" onclick="handleAfterDateOfServiceClick(event)">Dates of service after 04/01/2025</a>
+    </div>
+  </div>
+</div>
+
+<div class="content-display" id="contentDisplay">
+  Please select a billing option from the menu above.
+</div>
+
+<!-- Modals -->
+<div class="modal-overlay" id="paymentModal">
+  <div class="modal-content">
+    <button class="close-button" onclick="closeModal()">×</button>
+    <iframe src="https://hostedpaynow.com/hostedapp/tsys/ccPaymentForm"></iframe>
+  </div>
+</div>
+
+<div class="modal-overlay" id="careCreditModal">
+  <div class="modal-content">
+    <button class="close-button" onclick="closeCareCreditModal()">×</button>
+    <iframe src="https://www.carecredit.com/apply/"></iframe>
+  </div>
+</div>
+
+<div class="modal-overlay" id="afterServiceModal">
+  <div class="modal-content">
+    <button class="close-button" onclick="closeAfterServiceModal()">×</button>
+    <iframe src="https://example.com"></iframe>
+  </div>
+</div>
+
+<div class="modal-overlay" id="afterDateModal">
+  <div class="modal-content">
+    <button class="close-button" onclick="closeAfterDateModal()">×</button>
+    <iframe src="https://example.com"></iframe>
+  </div>
+</div>
+
+<script>
+function toggleDropdown(element) {
+  const dropdown = element.querySelector('.dropdown');
+  const isVisible = dropdown.classList.contains('open');
+  closeAllDropdowns();
+  if (!isVisible) {
+    dropdown.classList.add('open');
+    element.classList.add('active');
+  }
+}
+function closeAllDropdowns() {
+  document.querySelectorAll('.dropdown').forEach(d => {
+    d.classList.remove('open');
+    if (d.parentElement) d.parentElement.classList.remove('active');
+  });
+}
+function openModal() {
+  closeAllDropdowns();
+  document.getElementById('paymentModal').style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+}
+function closeModal() {
+  document.getElementById('paymentModal').style.display = 'none';
+  document.body.style.overflow = 'auto';
+}
+function openCareCreditModal(event) {
+  event.preventDefault();
+  closeAllDropdowns();
+  document.getElementById('careCreditModal').style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+}
+function closeCareCreditModal() {
+  document.getElementById('careCreditModal').style.display = 'none';
+  document.body.style.overflow = 'auto';
+}
+function handleDateOfServiceClick(event) {
+  event.preventDefault();
+  closeAllDropdowns();
+  document.getElementById('afterServiceModal').style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+}
+function closeAfterServiceModal() {
+  document.getElementById('afterServiceModal').style.display = 'none';
+  document.body.style.overflow = 'auto';
+}
+function handleAfterDateOfServiceClick(event) {
+  event.preventDefault();
+  closeAllDropdowns();
+  document.getElementById('afterDateModal').style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+}
+function closeAfterDateModal() {
+  document.getElementById('afterDateModal').style.display = 'none';
+  document.body.style.overflow = 'auto';
+}
+window.addEventListener("orientationchange", closeAllDropdowns);
+document.addEventListener('click', function (e) {
+  const isMenuItem = e.target.closest('.menu-item');
+  const isDropdown = e.target.closest('.dropdown');
+  const isModal = e.target.closest('.modal-content');
+  if (!isMenuItem && !isDropdown) closeAllDropdowns();
+  document.querySelectorAll('.modal-overlay').forEach(modal => {
+    if (modal.style.display === 'flex' && !isModal && e.target === modal) {
+      modal.style.display = 'none';
+      document.body.style.overflow = 'auto';
+    }
+  });
+});
+document.querySelectorAll('.modal-overlay').forEach(modal => {
+  modal.addEventListener('click', function (e) {
+    if (e.target === modal) {
+      modal.style.display = 'none';
+      document.body.style.overflow = 'auto';
+    }
+  });
+});
+</script>
+
+</body>
+</html>
